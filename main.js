@@ -154,7 +154,7 @@ document.addEventListener("click", (e) => {
         workstation.rot_lerp_alpha = 0;
     }
     //Check if user clicked bottom navigation button
-    else if(mouse_pos.y <= -0.5 && mouse_pos.y >= -1)
+    else if(mouse_pos.y <= -0.8 && mouse_pos.y >= -1)
     {
         //Update workstation view object focus state
         workstation.focused = !workstation.focused;
