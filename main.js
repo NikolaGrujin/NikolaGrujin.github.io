@@ -42,6 +42,8 @@ scene.add(anvil);
 //Update loop
 function update()
 {
+    camera.rotation.y += 0.05;
+    console.log(camera.rotation.y);
     //Render the scene to the camera
     renderer.render(scene, camera);
 }
