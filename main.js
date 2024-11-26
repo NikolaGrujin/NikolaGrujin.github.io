@@ -30,14 +30,13 @@ const anvil = new THREE.Object3D();
 //Configuring and positioning game objects
 floor_plane.position.y = -1.0;
 hammer.castShadow = true;
-hammer.position.z = -1.0;
+hammer.position.x = -1.0;
 anvil.castShadow = true;
-anvil.position.z = 1.0;
+anvil.position.x = 1.0;
 
-//Position and rotate camera
-camera.position.y = 1.0;
-camera.position.x = -1.0;
-camera.rotation.z = 0.5;
+//Position camera
+camera.position.y = 5.0;
+camera.position.z = 2.0;
 
 //Loading models and parenting them to their corresponding objects
 LoadModel("models/hammer.glb", hammer);
