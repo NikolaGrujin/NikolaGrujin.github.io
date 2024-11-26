@@ -10,13 +10,16 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-//Configuring scene
+//Configuring scene and renderer
+renderer.setClearColor(0xfcba03);
 scene.background = new THREE.Color("#fcba03");
 
 //Creating model loader object
 const model_loader = new GLTFLoader();
 
 //Creating game objects
+const light = new THREE.DirectionalLight(0xffffff, 0.5);
+
 const floor_geo = new THREE.PlaneGeometry(10, 10);
 const floor_mat = new THREE.MeshBasicMaterial({color: "#fcba03"});
 const floor_plane = new THREE.Mesh(floor_geo, floor_mat);
@@ -41,6 +44,7 @@ LoadModel("models/hammer.glb", hammer);
 LoadModel("models/anvil.glb", anvil);
 
 //Adding game objects to the scene
+scene.add(light);
 scene.add(floor_plane);
 scene.add(hammer);
 scene.add(anvil);
