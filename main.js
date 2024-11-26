@@ -10,11 +10,17 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+//Configuring scene
+scene.background = new THREE.Color("#fcba03");
+
 //Creating model loader object
 const model_loader = new GLTFLoader();
 
 //Creating game objects
-const floor_plane = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshBasicMaterial({color: "#d199c4"}));
+const floor_geo = new THREE.PlaneGeometry(10, 10);
+const floor_mat = new THREE.MeshBasicMaterial({color: "#fcba03"});
+const floor_plane = new THREE.Mesh(floor_geo, floor_mat);
+
 const hammer = new THREE.Object3D();
 const anvil = new THREE.Object3D();
 
@@ -39,11 +45,31 @@ scene.add(floor_plane);
 scene.add(hammer);
 scene.add(anvil);
 
+//Debug key events for camera rotation
+document.addEventListener("keydown", (e) => {
+    switch(e.key)
+    {
+        case " ":
+            console.log("x: " + camera.rotation.x + " ,y: " + camera.rotation.y);
+            break;
+        case "ArrowUp":
+            camera.rotation.x += 0.5;
+            break;
+        case "ArrowDown":
+            camera.rotation.x -= 0.5;
+            break;
+        case "ArrowLeft":
+            camera.rotation.y += 0.5;
+            break;
+        case "ArrowRight":
+            camera.rotation.y -= 0.5;
+            break;
+    }
+});
+
 //Update loop
 function update()
 {
-    camera.rotation.y += 0.05;
-    console.log(camera.rotation.y);
     //Render the scene to the camera
     renderer.render(scene, camera);
 }
