@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/loaders/GLTFLoader.js';
 
 //Creating scene and camera objects
