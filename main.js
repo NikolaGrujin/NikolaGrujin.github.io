@@ -1,9 +1,15 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/GLTFLoader.js';
+import * as SMITH from './smithing.js';
 
 //Creating scene and camera objects
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+//Creating UI object specifiers
+const left_arrow_ui = document.getElementById("left-arrow");
+const right_arrow_ui  = document.getElementById("right-arrow");
+const up_arrow_ui = document.getElementById("up-arrow");
 
 //Creating renderer object and adding DOM element to page
 const renderer = new THREE.WebGLRenderer();
@@ -38,10 +44,14 @@ const quench_oil_geo = new THREE.CircleGeometry(1.5, 32);
 const quench_oil_mat = new THREE.MeshStandardMaterial({color: 0x875b08, transparent: true, opacity: 0.85, side: THREE.DoubleSide});
 const quench_oil = new THREE.Mesh(quench_oil_geo, quench_oil_mat);
 
+const grinder_table_geo = new THREE.BoxGeometry(5, 2.25, 5);
+const grinder_table = new THREE.Mesh(grinder_table_geo, floor_mat);
+
 const hammer = new THREE.Object3D();
 const anvil = new THREE.Object3D();
 const forge = new THREE.Object3D();
 const bucket = new THREE.Object3D();
+const grinder = new THREE.Object3D();
 
 //Configuring and positioning game objects
 sun_light.position.set(0, 20, 0);
@@ -50,11 +60,11 @@ sun_light.castShadow = true;
 sun_light.shadow.mapSize.width = 512;
 sun_light.shadow.mapSize.height = 512;
 sun_light.shadow.camera.near = 0.5;
-sun_light.shadow.left = -10;
-sun_light.shadow.right = 10;
-sun_light.shadow.top = 10;
-sun_light.shadow.bottom = -10;
-sun_light.shadow.camera.far = 200;
+sun_light.shadow.camera.left = -20;
+sun_light.shadow.camera.right = 20;
+sun_light.shadow.camera.top = 20;
+sun_light.shadow.camera.bottom = -20;
+sun_light.shadow.camera.far = 300;
 
 floor_plane.position.set(0, -6, 0);
 floor_plane.rotation.x = Math.PI / 2;
@@ -64,6 +74,9 @@ forge_light.position.set(0, -1.25, 7.1);
 
 quench_oil.position.set(6, -3.2, 0);
 quench_oil.rotation.x = Math.PI / 2;
+
+grinder_table.receiveShadow = true;
+grinder_table.position.set(-5, -4, 0);
 
 hammer.castShadow = true;
 hammer.position.set(-2, -2, -4);
@@ -79,6 +92,10 @@ forge.position.set(0, -7, 7);
 bucket.castShadow = true;
 bucket.position.set(6, -6.3, 0);
 
+grinder.castShadow = true;
+grinder.position.set(-5, -2, 0);
+grinder.rotation.set(0, -Math.PI / 2, 0);
+
 //Configure, position, and rotate camera
 camera.rotation.order = "YXZ";
 camera.rotation.set(-0.2, 0, 0);
@@ -88,17 +105,20 @@ LoadModel("models/hammer.glb", hammer);
 LoadModel("models/anvil.glb", anvil);
 LoadModel("models/forge.glb", forge);
 LoadModel("models/bucket.glb", bucket);
+LoadModel("models/grinder.glb", grinder);
 
 //Adding game objects to the scene
 scene.add(sun_light);
 scene.add(ambient_light);
 scene.add(forge_light);
 scene.add(quench_oil);
+scene.add(grinder_table);
 scene.add(floor_plane);
 scene.add(hammer);
 scene.add(anvil);
 scene.add(forge);
 scene.add(bucket);
+scene.add(grinder);
 
 //Creating variables for tracking current view and animation state
 const workstation = {id: 0, focused: false, lerp_alpha: 0, rot_lerp_alpha: 0, rot_start: 0, rot_end: 0};
@@ -109,28 +129,49 @@ const raycaster = new THREE.Raycaster();
 
 //Click event listener
 document.addEventListener("click", (e) => {
+    //Translate screen pixel coords to normalized viewport coords
     mouse_pos.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse_pos.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
+    //Check if user clicked left navigation button
     if(mouse_pos.x <= -0.8 && mouse_pos.x >= -1 && !workstation.focused && workstation.lerp_alpha == 0 && workstation.rot_lerp_alpha == 1)
     {
+        //Update workstation view object properties
         workstation.rot_start = workstation.id * (Math.PI / 2);
         workstation.id++;
         workstation.rot_end = workstation.id * (Math.PI / 2);
         if(workstation.id > 3) workstation.id = 0;
         workstation.rot_lerp_alpha = 0;
     }
+    //Check if user clicked right navigation button
     else if(mouse_pos.x >= 0.8 && mouse_pos.x <= 1 && !workstation.focused && workstation.lerp_alpha == 0 && workstation.rot_lerp_alpha == 1)
     {
+        //Update workstation view object properties
         workstation.rot_start = workstation.id * (Math.PI / 2);
         workstation.id--;
         workstation.rot_end = workstation.id * (Math.PI / 2);
         if(workstation.id < 0) workstation.id = 3;
         workstation.rot_lerp_alpha = 0;
     }
+    //Check if user clicked bottom navigation button
     else if(mouse_pos.y <= -0.5 && mouse_pos.y >= -1)
     {
+        //Update workstation view object focus state
         workstation.focused = !workstation.focused;
+
+        //Toggle left and right navigation buttons based on workstation view focus state
+        if(workstation.focused)
+        {
+            left_arrow_ui.style.visibility = "hidden";
+            right_arrow_ui.style.visibility = "hidden";
+            up_arrow_ui.innerHTML = "&dArr;";
+        }
+        else
+        {
+            left_arrow_ui.style.visibility = "visible";
+            right_arrow_ui.style.visibility = "visible";
+            up_arrow_ui.innerHTML = "&uArr;";
+        }
     }
 });
 
@@ -148,7 +189,7 @@ function update()
     workstation.rot_lerp_alpha += 0.9 * deltatime;
     workstation.rot_lerp_alpha = Math.min(Math.max(workstation.rot_lerp_alpha, 0), 1);
 
-    //Check workstation id, interpolate if required
+    //Lerp position and rotation of camera based on currently viewed workstation
     const workstation_pos = new THREE.Vector3(0, 0, 0);
     const workstation_rot = new THREE.Vector3(0, 0, 0);
     switch(workstation.id)
