@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/GLTFLoader.js';
 import * as SMITH from './smithing.js';
+import { Billet } from './smithing.js';
 
 //Creating scene and camera objects
 const scene = new THREE.Scene();
@@ -24,6 +25,13 @@ scene.background = new THREE.Color("#fcba03");
 
 //Creating clock object
 const clock = new THREE.Clock();
+
+//Creating workpiece object and positioning it
+const workpiece = new SMITH.Billet("steel", 0.5, 1.0, 1556, [[new THREE.Color(0x403e3e), 0],[new THREE.Color(0xe02200), 870],[new THREE.Color(0xffa200), 1200],[new THREE.Color(0xffe46e), 1600]], 5, 5, 10);
+workpiece.moveTo(0, -3, -5);
+
+//Creating workpiece_state object for keeping track of workpiece interaction state
+const workpiece_state = {grabbed: false};
 
 //Creating model loader object
 const model_loader = new GLTFLoader();
@@ -119,13 +127,13 @@ scene.add(anvil);
 scene.add(forge);
 scene.add(bucket);
 scene.add(grinder);
+scene.add(workpiece.pivot);
 
 //Creating variables for tracking current view and animation state
 const workstation = {id: 0, focused: false, lerp_alpha: 0, rot_lerp_alpha: 0, rot_start: 0, rot_end: 0};
 
-//Creating a raycaster and mouse position vector
+//Creating a mouse position vector
 const mouse_pos = new THREE.Vector2(0, 0);
-const raycaster = new THREE.Raycaster();
 
 //Click event listener
 document.addEventListener("click", (e) => {
@@ -175,9 +183,52 @@ document.addEventListener("click", (e) => {
     }
 });
 
+//Creating an bbject for storing interaction state
+const interaction = {pressed: false, dragged: false, pos: new THREE.Vector2(0, 0)};
+
+//Touch start/mouse button down event handler
+function userPress(e)
+{
+    interaction.pressed = true;
+    interaction.dragged = false;
+
+    interaction.pos.x = (e.clientX / window.innerWidth) * 2 - 1;
+    interaction.pos.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(interaction.pos, camera);
+    const intersect = raycaster.intersectObject(workpiece.mesh);
+}
+
+//Touch move/mouse move event handler
+function userMove(e)
+{
+    if(interaction.pressed)
+    {
+        interaction.dragged = true;
+
+        interaction.x = (e.clientX / window.innerWidth) * 2 - 1;
+        interaction.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    }
+}
+
+//Touch end/mouse button up event handler
+function userRelease(e)
+{
+    interaction.pressed = false;
+
+    if(!interaction.dragged)
+    {
+
+    }
+}
+
+//Creating a raycaster object
+const raycaster = new THREE.Raycaster();
+
 //Update loop
 function update()
 {
+    /// Animation block
     //Get deltatime
     const deltatime = clock.getDelta();
 
@@ -201,7 +252,7 @@ function update()
             workstation_pos.set(-2, 0, 0);
             break;
         case 2:
-            workstation_pos.set(0, 0, 2);
+            workstation_pos.set(0, 1, 2);
             break;
         case 3:
             workstation_pos.set(2, 0, 0);
@@ -212,6 +263,15 @@ function update()
     workstation_rot.lerpVectors(new THREE.Vector3(0, workstation.rot_start, 0), new THREE.Vector3(0, workstation.rot_end, 0), workstation.rot_lerp_alpha);
     camera.rotation.y = workstation_rot.y;
     camera.position.lerpVectors(new THREE.Vector3(0, 0, 0), workstation_pos, workstation.lerp_alpha);
+
+    /// Interaction block
+    if(workstation.focused)
+    {
+        if(workpiece_state.grabbed)
+        {
+            workpiece.moveTo();
+        }
+    }
 
     //Render the scene to the camera
     renderer.render(scene, camera);
