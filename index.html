@@ -18,6 +18,16 @@
         <ol id="playlist">
         </ol>
         <script type="text/javascript">
+            //Service worker
+            if("serviceWorker" in navigator)
+            {
+                navigator.serviceWorker.register("service-worker.js").then(() => {
+                    console.log("Service worker registered!");
+                }).catch((error) => {
+                    window.alert("Error registering service worker!\nError: " + error);
+                });
+            }
+            
             //UI controls
             const musicInput = document.getElementById("musicInput");
             const fLoadButton = document.getElementById("forceLoad");
