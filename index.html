@@ -9,7 +9,7 @@
     </head>
     <body>
         <input type="file" id="musicInput" accept=".mp3,audio/mpeg" multiple/>
-        <button id="shuffle">Shuffle: off</button>
+        <button id="shuffle">Shuffle</button>
         <button id="play">Play</button>
         <button id="previous">Previous</button>
         <button id="next">Next</button>
@@ -38,12 +38,10 @@
             const pauseButton = document.getElementById("pause");
             const clearButton = document.getElementById("clear");
 
-            //Playlist list element, playlist, shuffle, last_played, and song list
+            //Playlist list element, playlist, and song list
             const playlistList = document.getElementById("playlist");
             let songlist = {};
             let playlist = [];
-            let shuffle = false;
-            let last_played = [];
             let current_song = 0;
             
             //Audio element
@@ -68,6 +66,13 @@
                 }
             }
 
+            //Shuffle playlist
+            function shuffle()
+            {
+                
+            }
+
+            //Play
             function play()
             {
                 if(audioPlayer.src != null)
@@ -76,6 +81,7 @@
                 }
             }
 
+            //Previous song
             function previous()
             {
                 pause();
@@ -91,6 +97,7 @@
                 play();
             }
 
+            //Next song
             function next()
             {
                 pause();
@@ -106,6 +113,7 @@
                 play();
             }
 
+            //Pause
             function pause()
             {
                 if(audioPlayer.src != null)
@@ -114,6 +122,7 @@
                 }
             }
 
+            //Clear playlist
             function clear()
             {
                 audioPlayer.pause();
@@ -133,7 +142,7 @@
 
             //Attaching event listeners to controls
             musicInput.addEventListener("change", loadMusic);
-            shufButton.addEventListener("click", () => { shuffle = !shuffle; });
+            shufButton.addEventListener("click", shuffle);
             playButton.addEventListener("click", play);
             prevButton.addEventListener("click", previous);
             nextButton.addEventListener("click", next);
