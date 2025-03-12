@@ -8,7 +8,7 @@
     </head>
     <body>
         <input type="file" id="musicInput" accept=".mp3,audio/mpeg" multiple/>
-        <button id="forceLoad">Force Load</button>
+        <button id="shuffle">Shuffle: off</button>
         <button id="play">Play</button>
         <button id="previous">Previous</button>
         <button id="next">Next</button>
@@ -30,17 +30,19 @@
             
             //UI controls
             const musicInput = document.getElementById("musicInput");
-            const fLoadButton = document.getElementById("forceLoad");
+            const shufButton = document.getElementById("shuffle");
             const playButton = document.getElementById("play");
             const prevButton = document.getElementById("previous");
             const nextButton = document.getElementById("next");
             const pauseButton = document.getElementById("pause");
             const clearButton = document.getElementById("clear");
 
-            //Playlist list element, playlist, and song list
+            //Playlist list element, playlist, shuffle, last_played, and song list
             const playlistList = document.getElementById("playlist");
             let songlist = {};
             let playlist = [];
+            let shuffle = false;
+            let last_played = [];
             let current_song = 0;
             
             //Audio element
@@ -59,7 +61,6 @@
                         playlistList.appendChild(listEntry);
                         songlist[song.name] = URL.createObjectURL(song);
                         playlist.push(song.name);
-                        window.alert(song.name + " loaded!");
                     }
 
                     audioPlayer.src = songlist[playlist[current_song]];
@@ -131,7 +132,7 @@
 
             //Attaching event listeners to controls
             musicInput.addEventListener("change", loadMusic);
-            fLoadButton.addEventListener("click", loadMusic);
+            shufButton.addEventListener("click", () => { shuffle = !shuffle; });
             playButton.addEventListener("click", play);
             prevButton.addEventListener("click", previous);
             nextButton.addEventListener("click", next);
