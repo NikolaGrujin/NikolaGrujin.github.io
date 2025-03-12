@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Radioport</title>
+    </head>
+    <body>
+        <input type="file" id="musicInput" accept=".mp3,audio/mpeg" multiple/>
+        <button id="forceLoad">Force Load</button>
+        <button id="play">Play</button>
+        <button id="previous">Previous</button>
+        <button id="next">Next</button>
+        <button id="pause">Pause</button>
+        <button id="clear">Clear</button>
+        <h3>Playlist:</h3>
+        <ol id="playlist">
+        </ol>
+        <script type="text/javascript">
+            //UI controls
+            const musicInput = document.getElementById("musicInput");
+            const fLoadButton = document.getElementById("forceLoad");
+            const playButton = document.getElementById("play");
+            const prevButton = document.getElementById("previous");
+            const nextButton = document.getElementById("next");
+            const pauseButton = document.getElementById("pause");
+            const clearButton = document.getElementById("clear");
+
+            //Playlist list element, playlist, and song list
+            const playlistList = document.getElementById("playlist");
+            let songlist = {};
+            let playlist = [];
+            let current_song = 0;
+            
+            //Audio element
+            const audioPlayer = new Audio();
+
+            //Load audio files into playlist
+            function loadMusic()
+            {
+                if(musicInput.files.length > 0)
+                {
+                    for(const song of musicInput.files)
+                    {
+                        const listEntry = document.createElement("li");
+                        const entryText = document.createTextNode(song.name);
+                        listEntry.appendChild(entryText);
+                        playlistList.appendChild(listEntry);
+                        songlist[song.name] = URL.createObjectURL(song);
+                        playlist.push(song.name);
+                        window.alert(song.name + " loaded!");
+                    }
+
+                    audioPlayer.src = songlist[playlist[current_song]];
+                }
+            }
+
+            function play()
+            {
+                if(audioPlayer.src != null)
+                {
+                    audioPlayer.play();
+                }
+            }
+
+            function previous()
+            {
+                pause();
+                if(current_song > 0)
+                {
+                    current_song--;
+                }
+                else
+                {
+                    current_song = playlist.length - 1;
+                }
+                audioPlayer.src = songlist[playlist[current_song]];
+                play();
+            }
+
+            function next()
+            {
+                pause();
+                if(current_song < playlist.length - 1)
+                {
+                    current_song++;
+                }
+                else
+                {
+                    current_song = 0;
+                }
+                audioPlayer.src = songlist[playlist[current_song]];
+                play();
+            }
+
+            function pause()
+            {
+                if(audioPlayer.src != null)
+                {
+                    audioPlayer.pause();
+                }
+            }
+
+            function clear()
+            {
+                audioPlayer.pause();
+                audioPlayer.src = null;
+                for(let song in songlist)
+                {
+                    URL.revokeObjectURL(songlist[song]);
+                    delete songlist[song];
+                }
+                playlist = [];
+                let entries = playlistList.querySelectorAll("li");
+                for(let entry of entries)
+                {
+                    playlistList.removeChild(entry);
+                }
+            }
+
+            //Attaching event listeners to controls
+            musicInput.addEventListener("change", loadMusic);
+            fLoadButton.addEventListener("click", loadMusic);
+            playButton.addEventListener("click", play);
+            prevButton.addEventListener("click", previous);
+            nextButton.addEventListener("click", next);
+            pauseButton.addEventListener("click", pause);
+            clearButton.addEventListener("click", clear);
+        </script>
+    </body>
+</html>
