@@ -63,6 +63,8 @@
 
                     playlist.sort();
 
+                    playlistList.innerHTML = "";
+
                     for(let song of playlist)
                     {
                         const listEntry = document.createElement("li");
@@ -211,11 +213,11 @@
             shufButton.addEventListener("click", () => {
                 if(shuffle)
                 {
-                    shufButton.innerText = "Shuffle: on";
+                    shufButton.innerText = "Shuffle: off";
                 }
                 else
                 {
-                    shufButton.innerText = "Shuffle: off";
+                    shufButton.innerText = "Shuffle: on";
                 }
                 shuffle = !shuffle;
             });
