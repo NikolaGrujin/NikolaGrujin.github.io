@@ -9,7 +9,7 @@
     </head>
     <body>
         <input type="file" id="musicInput" accept=".mp3,audio/mpeg" multiple/>
-        <button id="shuffle">Shuffle</button>
+        <button id="shuffle">Shuffle: off</button>
         <button id="play">Play</button>
         <button id="previous">Previous</button>
         <button id="next">Next</button>
@@ -38,11 +38,12 @@
             const pauseButton = document.getElementById("pause");
             const clearButton = document.getElementById("clear");
 
-            //Playlist list element, playlist, last 20 played songs, and song list
+            //Playlist list element, playlist, last 20 played songs, shuffle toggle, current song, and song list
             const playlistList = document.getElementById("playlist");
             let songlist = {};
             let playlist = [];
             let last_played = [];
+            let shuffle = true;
             let current_song = 0;
             
             //Audio element
@@ -70,13 +71,20 @@
                     }
 
                     audioPlayer.src = songlist[playlist[current_song]];
+                    last_played = [];
+                    if(playlist.length >= 40)
+                    {
+                        last_played_capacity = 20;
+                    }
+                    else if(playlist.length >= 10)
+                    {
+                        last_played_capacity = Math.floor(playlist.length / 2);
+                    }
+                    else
+                    {
+                        last_played_capacity = 1;
+                    }
                 }
-            }
-
-            //Shuffle playlist
-            function shuffle()
-            {
-
             }
 
             //Play
@@ -84,6 +92,8 @@
             {
                 if(audioPlayer.src != null)
                 {
+                    playButton.disabled = true;
+                    pauseButton.disabled = false;
                     audioPlayer.play();
                 }
             }
@@ -104,17 +114,48 @@
                 play();
             }
 
+            //Select next shuffled song
+            function nextShuffled()
+            {
+                last_played.push(playlist[current_song]);
+                if(last_played.length > last_played_capacity)
+                {
+                    last_played.shift();
+                }
+                selecting_song = true;
+                while(selecting_song)
+                {
+                    selecting_song = false;
+                    current_song = Math.floor(Math.random() * playlist.length);
+
+                    for(let song of last_played)
+                    {
+                        if(song == playlist[current_song])
+                        {
+                            selecting_song = true;
+                        }
+                    }
+                }
+            }
+
             //Next song
             function next()
             {
                 pause();
-                if(current_song < playlist.length - 1)
+                if(shuffle)
                 {
-                    current_song++;
+                    nextShuffled();
                 }
                 else
                 {
-                    current_song = 0;
+                    if(current_song < playlist.length - 1)
+                    {
+                        current_song++;
+                    }
+                    else
+                    {
+                        current_song = 0;
+                    }
                 }
                 audioPlayer.src = songlist[playlist[current_song]];
                 play();
@@ -125,6 +166,8 @@
             {
                 if(audioPlayer.src != null)
                 {
+                    playButton.disabled = false;
+                    pauseButton.disabled = true;
                     audioPlayer.pause();
                 }
             }
@@ -140,21 +183,40 @@
                     delete songlist[song];
                 }
                 playlist = [];
+                last_played = [];
+                last_played_capacity = 0;
                 let entries = playlistList.querySelectorAll("li");
                 for(let entry of entries)
                 {
                     playlistList.removeChild(entry);
                 }
+                playButton.disabled = false;
+                pauseButton.disabled = false;
             }
+
+            //Attaching event listener to audio player
+            audioPlayer.addEventListener("ended", next);
 
             //Attaching event listeners to controls
             musicInput.addEventListener("change", loadMusic);
-            shufButton.addEventListener("click", shuffle);
             playButton.addEventListener("click", play);
             prevButton.addEventListener("click", previous);
             nextButton.addEventListener("click", next);
             pauseButton.addEventListener("click", pause);
             clearButton.addEventListener("click", clear);
+
+            //Shuffle toggle
+            shufButton.addEventListener("click", () => {
+                if(shuffle)
+                {
+                    shufButton.innerText = "Shuffle: on";
+                }
+                else
+                {
+                    shufButton.innerText = "Shuffle: off";
+                }
+                shuffle = !shuffle;
+            });
         </script>
     </body>
 </html>
