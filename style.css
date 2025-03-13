@@ -1,6 +1,7 @@
 :root {
     --primary-theme-color: #00a100;
     --secondary-theme-color: #141814;
+    --tertiary-theme-color: #1d4d1d;
 }
 
 body {
@@ -13,4 +14,14 @@ button {
     color: var(--secondary-theme-color);
     outline: var(--primary-theme-color) 2px solid;
     border: var(--secondary-theme-color) 2px solid;
+}
+
+button :hover {
+    background-color: var(--tertiary-theme-color);
+    color: var(--primary-theme-color);
+}
+
+button :disabled {
+    background-color: var(--secondary-theme-color);
+    color: var(--primary-theme-color);
 }
