@@ -1,6 +1,7 @@
 const CACHE_NAME = "radioport-v1-cache";
 const FILES_TO_CACHE = [
   "index.html",
+  "style.css",
   "manifest.json",
   "icon-192.png",
   "icon-256.png",
