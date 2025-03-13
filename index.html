@@ -38,28 +38,35 @@
             const pauseButton = document.getElementById("pause");
             const clearButton = document.getElementById("clear");
 
-            //Playlist list element, playlist, and song list
+            //Playlist list element, playlist, last 20 played songs, and song list
             const playlistList = document.getElementById("playlist");
             let songlist = {};
             let playlist = [];
+            let last_played = [];
             let current_song = 0;
             
             //Audio element
             const audioPlayer = new Audio();
 
-            //Load audio files into playlist
+            //Load audio files, and sort alphabetically into playlist
             function loadMusic()
             {
                 if(musicInput.files.length > 0)
                 {
                     for(const song of musicInput.files)
                     {
-                        const listEntry = document.createElement("li");
-                        const entryText = document.createTextNode(song.name);
-                        listEntry.appendChild(entryText);
-                        playlistList.appendChild(listEntry);
                         songlist[song.name] = URL.createObjectURL(song);
                         playlist.push(song.name);
+                    }
+
+                    playlist.sort();
+
+                    for(let song of playlist)
+                    {
+                        const listEntry = document.createElement("li");
+                        const entryText = document.createTextNode(song);
+                        listEntry.appendChild(entryText);
+                        playlistList.appendChild(listEntry);
                     }
 
                     audioPlayer.src = songlist[playlist[current_song]];
@@ -69,7 +76,7 @@
             //Shuffle playlist
             function shuffle()
             {
-                
+
             }
 
             //Play
