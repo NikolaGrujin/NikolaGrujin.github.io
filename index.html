@@ -15,6 +15,7 @@
         <button id="next">Next</button>
         <button id="pause">Pause</button>
         <button id="clear">Clear</button>
+        <h3 id="playing">Now playing: </h3>
         <h3>Playlist:</h3>
         <ol id="playlist">
         </ol>
@@ -38,6 +39,8 @@
             const pauseButton = document.getElementById("pause");
             const clearButton = document.getElementById("clear");
 
+            //Now playing
+            const nowPlaying = document.getElementById("playing");
             //Playlist list element, playlist, last 20 played songs, shuffle toggle, current song, and song list
             const playlistList = document.getElementById("playlist");
             let songlist = {};
@@ -99,6 +102,7 @@
                     playButton.disabled = true;
                     pauseButton.disabled = false;
                     audioPlayer.play();
+                    nowPlaying.innerText = "Now Playing: " + playlist[current_song];
                 }
             }
 
@@ -196,6 +200,7 @@
                 }
                 playButton.disabled = false;
                 pauseButton.disabled = false;
+                nowPlaying.innerText = "Now Playing:";
             }
 
             //Attaching event listener to audio player
