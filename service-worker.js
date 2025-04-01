@@ -5,7 +5,8 @@ const FILES_TO_CACHE = [
   "manifest.json",
   "icon-192.png",
   "icon-256.png",
-  "icon-512.png"
+  "icon-512.png",
+  "favicon.ico"
 ];
 
 self.addEventListener("install", (event) => {
