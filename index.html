@@ -229,8 +229,12 @@
                 }
 
                 audioPlayer.src = songlist[playlist[current_song]];
+                artist_title = playlist[current_song].replace(".mp3", "").split(" - ");
+                nowPlaying.innerHTML = "Now Playing: <b>\"" + artist_title[1] + "\"</b> by " + artist_title[0];
 
-                if(announce && Math.floor(Math.random() * 7) == 3)
+                let roll = Math.floor(Math.random() * 7);
+                console.log("Roll: " + roll + " Result: " + (roll == 3));
+                if(announce && roll == 3)
                 {
                     //Create SpeechSynthesisUtterance with a randomly selected phrase with "<ARTIST>" replaced with the song artist, and "<TITLE>" with song title, then set voice, set end event, and speak
                     const utterance = new SpeechSynthesisUtterance(announcer_phrases[Math.floor(Math.random() * announcer_phrases.length)].replace("<ARTIST>", artist_title[0]).replace("<TITLE>", artist_title[1]));
@@ -278,6 +282,7 @@
                 playButton.disabled = false;
                 pauseButton.disabled = false;
                 nowPlaying.innerText = "Now Playing:";
+                current_song = 0;
             }
 
             //Attaching event listener to audio player
