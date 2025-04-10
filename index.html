@@ -228,6 +228,7 @@
                 {
                     pause();
                     current_song = playlist.indexOf(e.target.innerText);
+                    audioPlayer.src = songlist[playlist[current_song]];
                     play();
                 }
             });
