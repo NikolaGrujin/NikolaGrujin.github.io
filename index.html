@@ -104,6 +104,13 @@
                     pauseButton.disabled = false;
                     audioPlayer.play();
                     nowPlaying.innerText = "Now Playing: " + playlist[current_song];
+
+                    if("mediaSession" in navigator)
+                    {
+                        navigator.mediaSession.metadata = new MediaMetadata({
+                            title: playlist[current_song]
+                        });
+                    }
                 }
             }
 
@@ -214,6 +221,37 @@
             nextButton.addEventListener("click", next);
             pauseButton.addEventListener("click", pause);
             clearButton.addEventListener("click", clear);
+
+            //Play by selecting song in playlist
+            playlistList.addEventListener("click", (e) => {
+                if(e.target.tagName == "LI")
+                {
+                    pause();
+                    current_song = playlist.findIndex(e.target.innerText);
+                    play();
+                }
+            });
+
+            //Attaching media session controls if media session is supported
+            if("mediaSession" in navigator)
+            {
+                //Play
+                navigator.mediaSession.setActionHandler("play", () => {
+                    play();
+                });
+                //Pause
+                navigator.mediaSession.setActionHandler("pause", () => {
+                    pause();
+                });
+                //Next track
+                navigator.mediaSession.setActionHandler("nexttrack", () => {
+                    next();
+                });
+                //Previous track
+                navigator.mediaSession.setActionHandler("previoustrack", () => {
+                    previous();
+                });
+            }
 
             //Shuffle toggle
             shufButton.addEventListener("click", () => {
