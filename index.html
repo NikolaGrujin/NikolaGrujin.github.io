@@ -67,17 +67,21 @@
             const nowPlaying = document.getElementById("playing");
             const playlistList = document.getElementById("playlist");
 
-            //Playlist, last 20 played songs, shuffle toggle, current song, and song list
-            let songlist = {};
-            let playlist = [];
-            let last_played = [];
-            let last_played_capacity = 0;
-            let shuffle = false;
-            let announce = false;
-            let current_song = 0;
+            //Declaring global variables
+            let songlist = {};              //Dictionary of audio file blobs indexed by file name
+            let playlist = [];              //Array of file names
+            let last_played = [];           //Last [last_played_capacity] songs played, to avoid repeating songs
+            let current_song = 0;           //Index of currently playing song, used to index playlist
+            let last_played_capacity = 0;   //Maximum size of last_played array
+            let artist_title = [];          //Array holding artist and title of current song
+            let shuffle = false;            //Shuffle toggle
+            let announce = false;           //Announcer toggle
             
             //Audio element
             const audioPlayer = new Audio();
+
+            //Announcer phrases
+            const announcer_phrases = ["Next up, <TITLE> by <ARTIST>.", "And now, <TITLE> by <ARTIST>.", "Here comes <ARTIST> with <TITLE>.", "Up next, <TITLE>.", "Here's <TITLE>."];
 
             //SpeechSynthesis compatibility check, reference assignment, and getting voices
             let speechSynth = null;
@@ -141,12 +145,14 @@
                     playButton.disabled = true;
                     pauseButton.disabled = false;
                     audioPlayer.play();
-                    nowPlaying.innerText = "Now Playing: " + playlist[current_song];
+                    artist_title = playlist[current_song].replace(".mp3", "").split(" - ");
+                    nowPlaying.innerHTML = "Now Playing: <b>\"" + artist_title[1] + "\"</b> by " + artist_title[0];
 
                     if("mediaSession" in navigator)
                     {
                         navigator.mediaSession.metadata = new MediaMetadata({
-                            title: playlist[current_song]
+                            title: artist_title[1],
+                            artist: artist_title[0]
                         });
                     }
                 }
@@ -224,13 +230,15 @@
 
                 audioPlayer.src = songlist[playlist[current_song]];
 
-                if(announce)
+                if(announce && Math.floor(Math.random() * 7) == 3)
                 {
-                    const utterance = new SpeechSynthesisUtterance("Next up, " + playlist[current_song].replace("mp3", ""));
+                    //Create SpeechSynthesisUtterance with a randomly selected phrase with "<ARTIST>" replaced with the song artist, and "<TITLE>" with song title, then set voice, set end event, and speak
+                    const utterance = new SpeechSynthesisUtterance(announcer_phrases[Math.floor(Math.random() * announcer_phrases.length)].replace("<ARTIST>", artist_title[0]).replace("<TITLE>", artist_title[1]));
                     utterance.voice = synthVoices[0];
                     utterance.addEventListener("end", () => {
                         play();
                     });
+                    speechSynth.speak(utterance);
                 }
                 else
                 {
