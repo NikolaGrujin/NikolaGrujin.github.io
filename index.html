@@ -86,9 +86,9 @@
             //SpeechSynthesis compatibility check, reference assignment, and getting voices
             let speechSynth = null;
             let synthVoices = [];
-            if("speechSynthesis" in navigator)
+            if("speechSynthesis" in window)
             {
-                speechSynth = navigator.speechSynthesis;
+                speechSynth = window.speechSynthesis;
                 synthVoices = speechSynth.getVoices();
             }
             else
