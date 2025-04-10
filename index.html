@@ -227,7 +227,7 @@
                 if(e.target.tagName == "LI")
                 {
                     pause();
-                    current_song = playlist.findIndex(e.target.innerText);
+                    current_song = playlist.indexOf(e.target.innerText);
                     play();
                 }
             });
