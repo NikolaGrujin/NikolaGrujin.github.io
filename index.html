@@ -11,6 +11,7 @@
     <body>
         <input type="file" id="musicInput" accept=".mp3,audio/mpeg" multiple/>
         <button id="shuffle">Shuffle: off</button>
+        <button id="announcer">Announcer: off</button>
         <button id="play">Play</button>
         <button id="previous">Previous</button>
         <button id="next">Next</button>
@@ -30,29 +31,66 @@
                     window.alert("Error registering service worker!\nError: " + error);
                 });
             }
+
+            //MediaSession action handlers
+            if("mediaSession" in navigator)
+            {
+                //Play
+                navigator.mediaSession.setActionHandler("play", () => {
+                    play();
+                });
+                //Pause
+                navigator.mediaSession.setActionHandler("pause", () => {
+                    pause();
+                });
+                //Next track
+                navigator.mediaSession.setActionHandler("nexttrack", () => {
+                    next();
+                });
+                //Previous track
+                navigator.mediaSession.setActionHandler("previoustrack", () => {
+                    previous();
+                });
+            }
             
             //UI controls
             const musicInput = document.getElementById("musicInput");
             const shufButton = document.getElementById("shuffle");
+            const annoButton = document.getElementById("announcer");
             const playButton = document.getElementById("play");
             const prevButton = document.getElementById("previous");
             const nextButton = document.getElementById("next");
             const pauseButton = document.getElementById("pause");
             const clearButton = document.getElementById("clear");
 
-            //Now playing
+            //Now playing indicator and song list element
             const nowPlaying = document.getElementById("playing");
-            //Playlist list element, playlist, last 20 played songs, shuffle toggle, current song, and song list
             const playlistList = document.getElementById("playlist");
+
+            //Playlist, last 20 played songs, shuffle toggle, current song, and song list
             let songlist = {};
             let playlist = [];
             let last_played = [];
             let last_played_capacity = 0;
             let shuffle = false;
+            let announce = false;
             let current_song = 0;
             
             //Audio element
             const audioPlayer = new Audio();
+
+            //SpeechSynthesis compatibility check, reference assignment, and getting voices
+            let speechSynth = null;
+            let synthVoices = [];
+            if("speechSynthesis" in navigator)
+            {
+                speechSynth = navigator.speechSynthesis;
+                synthVoices = speechSynth.getVoices();
+            }
+            else
+            {
+                annoButton.disabled = true;
+            }
 
             //Load audio files, and sort alphabetically into playlist
             function loadMusic()
@@ -167,6 +205,7 @@
             {
                 pause();
                 updateLastPlayed();
+
                 if(shuffle)
                 {
                     nextShuffled();
@@ -182,8 +221,21 @@
                         current_song = 0;
                     }
                 }
+
                 audioPlayer.src = songlist[playlist[current_song]];
-                play();
+
+                if(announce)
+                {
+                    const utterance = new SpeechSynthesisUtterance("Next up, " + playlist[current_song].replace("mp3", ""));
+                    utterance.voice = synthVoices[0];
+                    utterance.addEventListener("end", () => {
+                        play();
+                    });
+                }
+                else
+                {
+                    play();
+                }
             }
 
             //Pause
@@ -243,27 +295,6 @@
                 }
             });
 
-            //Attaching media session controls if media session is supported
-            if("mediaSession" in navigator)
-            {
-                //Play
-                navigator.mediaSession.setActionHandler("play", () => {
-                    play();
-                });
-                //Pause
-                navigator.mediaSession.setActionHandler("pause", () => {
-                    pause();
-                });
-                //Next track
-                navigator.mediaSession.setActionHandler("nexttrack", () => {
-                    next();
-                });
-                //Previous track
-                navigator.mediaSession.setActionHandler("previoustrack", () => {
-                    previous();
-                });
-            }
-
             //Shuffle toggle
             shufButton.addEventListener("click", () => {
                 if(shuffle)
@@ -275,6 +306,18 @@
                     shufButton.innerText = "Shuffle: on";
                 }
                 shuffle = !shuffle;
+            });
+
+            //Announcer toggle
+            annoButton.addEventListener("click", () => {
+                if(announce)
+                {
+                    annoButton.innerText = "Announcer: off";
+                }
+                else
+                {
+                    annoButton.innerText = "Announcer: on";
+                }
             });
         </script>
     </body>
