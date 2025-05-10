@@ -12,6 +12,7 @@
         <input type="file" id="musicInput" accept=".mp3,audio/mpeg" multiple/>
         <button id="shuffle">Shuffle: off</button>
         <button id="announcer">Announcer: off</button>
+        <button id="annoConfig">Announcer config</button>
         <button id="play">Play</button>
         <button id="previous">Previous</button>
         <button id="next">Next</button>
@@ -57,6 +58,7 @@
             const musicInput = document.getElementById("musicInput");
             const shufButton = document.getElementById("shuffle");
             const annoButton = document.getElementById("announcer");
+            const annoConfig = document.getElementById("annoConfig");
             const playButton = document.getElementById("play");
             const prevButton = document.getElementById("previous");
             const nextButton = document.getElementById("next");
@@ -80,9 +82,12 @@
             //Audio element
             const audioPlayer = new Audio();
 
-            //Announcer phrases
-            const announcer_phrases = ["Next up, <TITLE> by <ARTIST>.", "And now, <TITLE> by <ARTIST>.", "Here comes <ARTIST> with <TITLE>.", "Up next, <TITLE>.", "Here's <TITLE>."];
-
+            //Announcer data object
+            const announcerData = {
+                    phrases: ["Next up, <TITLE> by <ARTIST>.", "And now, <TITLE> by <ARTIST>.", "Here comes <ARTIST> with <TITLE>.", "Up next, <TITLE>.", "Here's <TITLE>."],
+                    segments: []
+                };
+            
             //SpeechSynthesis compatibility check, reference assignment, and getting voices
             let speechSynth = null;
             let synthVoices = [];
@@ -90,10 +95,29 @@
             {
                 speechSynth = window.speechSynthesis;
                 synthVoices = speechSynth.getVoices();
+
+                let loadedPhrases = window.localStorage.getItem("phrases");
+                let loadedSegments = window.localStorage.getItem("segments");
+
+                if(loadedPhrases)
+                {
+                    announcerData.phrases = loadedPhrases.split("<BREAK>");
+                }
+
+                if(loadedSegments)
+                {
+                    announcerData.segments = loadedSegments.split("<BREAK>");
+                }
             }
             else
             {
                 annoButton.disabled = true;
+            }
+
+            //Load announcer phrases and segments from prompt into announcer data object and into local storage
+            function loadAnnouncerData()
+            {
+                
             }
 
             //Load audio files, and sort alphabetically into playlist
@@ -233,11 +257,10 @@
                 nowPlaying.innerHTML = "Now Playing: <b>\"" + artist_title[1] + "\"</b> by " + artist_title[0];
 
                 let roll = Math.floor(Math.random() * 7);
-                console.log("Roll: " + roll + " Result: " + (roll == 3));
                 if(announce && roll == 3)
                 {
                     //Create SpeechSynthesisUtterance with a randomly selected phrase with "<ARTIST>" replaced with the song artist, and "<TITLE>" with song title, then set voice, set end event, and speak
-                    const utterance = new SpeechSynthesisUtterance(announcer_phrases[Math.floor(Math.random() * announcer_phrases.length)].replace("<ARTIST>", artist_title[0]).replace("<TITLE>", artist_title[1]));
+                    const utterance = new SpeechSynthesisUtterance(announcerData.phrases[Math.floor(Math.random() * announcerData.phrases.length)].replace("<ARTIST>", artist_title[0]).replace("<TITLE>", artist_title[1]));
                     utterance.voice = synthVoices[0];
                     utterance.addEventListener("end", () => {
                         play();
