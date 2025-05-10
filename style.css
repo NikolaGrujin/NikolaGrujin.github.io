@@ -25,3 +25,10 @@ button:disabled {
     background-color: var(--secondary-theme-color);
     color: var(--primary-theme-color);
 }
+
+li {
+    border: var(--primary-theme-color) 2px solid;
+    text-align: center;
+    background: linear-gradient(var(--secondary-theme-color), var(--tertiary-theme-color), var(--secondary-theme-color));
+    padding: 3px;
+}
